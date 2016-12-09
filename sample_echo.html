@@ -1,0 +1,80 @@
+<!doctype html>
+<html>
+	<head>
+		<script src="js/jquery.min.js"></script>
+		<script src="js/bootstrap.min.js"></script>
+		<link rel="stylesheet" href="css/bootstrap.min.css" />
+		<script>
+
+			var websocket;
+
+			$(function() {
+
+				websocket = new WebSocket("ws://127.0.0.1:8080/");
+				websocket.onopen = function (ev) {
+					printInput("Connected to server!");
+				};
+
+				websocket.onclose = function(ev) {
+					printInput("Disconnected!");
+				};
+
+				websocket.onmessage = function(ev) {
+					printOutput("<< " + ev.data);
+				};
+
+				websocket.onerror = function(ev) {
+					printOutput("Error: " + ev.data);
+				};
+
+				$('.btn-send').on('click', sendMessage);
+
+			});
+
+			function sendMessage() {
+				var msg = $('#input').val();
+				websocket.send(msg);
+				printInput(">> " + msg);
+
+				return false;
+			}
+
+			function printOutput(msg) {
+				$('#outputMessages').append('<p>' +  msg +  '</p>')
+			}
+
+			function printInput(msg) {
+				$('#inputMessages').append('<p>' +  msg +  '</p>')
+			}
+
+		</script>
+	</head>
+	<body>
+		<div class="container">
+
+			<div class="col-md-6">
+				<div class="panel panel-info">
+					<div class="panel-heading clearfix">
+						<div class="col-md-9">
+							<input type="text" class="form-control" id="input" placeholder="Enviar mensagem..." />
+						</div>
+						<div class="col-md-3">
+							<button type="button" class="btn btn-send btn-default">Enviar</button>
+						</div>
+					</div>
+					<div class="panel-body" id="inputMessages"></div>
+				</div>
+			</div>
+
+			<div class="col-md-6">
+				<div class="panel panel-success">
+					<div class="panel-heading">
+						Mensagens recebidas
+					</div>
+					<div class="panel-body" id="outputMessages"></div>
+				</div>
+			</div>
+
+		</div>
+	</body>
+</html>
