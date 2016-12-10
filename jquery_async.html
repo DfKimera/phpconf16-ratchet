@@ -1,0 +1,56 @@
+<!doctype html>
+<html>
+<head>
+	<script src="js/jquery.min.js"></script>
+	<script src="js/bootstrap.min.js"></script>
+	<link rel="stylesheet" href="css/bootstrap.min.css" />
+	<script>
+
+		var websocket;
+
+		$(function() {
+
+			sendMessage();
+
+			function sendMessage() {
+				$.post('send.php', {message: message}, onMessageSent);
+				$('.message-loading-icon').show();
+			}
+
+			function onMessageSent(data) {
+				$('.message-loading-icon').hide();
+				$('.result').text(data);
+			}
+
+			askUserAge();
+
+			function askUserAge() {
+
+				var age = prompt('What is your age?');
+
+				alert("You said you are ' + age + ' years old...");
+
+				if(parseInt(age) >= 18) {
+					alert("Let's go have a drink after the talk!")
+				}
+
+			}
+
+		});
+
+	</script>
+	<style>
+
+
+	</style>
+</head>
+<body>
+<div class="container">
+	<div class="col-md-12">
+
+
+
+	</div>
+</div>
+</body>
+</html>
