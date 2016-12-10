@@ -1,33 +1,108 @@
 <!doctype html>
 <html>
-	<head>
-		<script src="js/jquery.min.js"></script>
-		<script src="js/bootstrap.min.js"></script>
-		<link rel="stylesheet" href="css/bootstrap.min.css" />
-		<script>
+<head>
+	<script src="js/jquery.min.js"></script>
+	<script src="js/bootstrap.min.js"></script>
+	<link rel="stylesheet" href="css/bootstrap.min.css" />
+	<script>
 
-			var websocket;
+		var websocket;
 
-			$(function() {
+		var $messages;
+		var $input;
+		var $nickname;
 
-				// COLA :D
-				// onopen, onmessage, send
+		$(function() {
 
-			});
+			$messages = $('#messages');
+			$input = $('#input');
+			$nickname = $('#nickname');
 
-		</script>
-		<style>
+			websocket = new WebSocket("ws://127.0.0.1:8080/");
+			websocket.onopen = function (ev) {
+				print('system', "Connected to server!");
+			};
 
+			websocket.onclose = function(ev) {
+				print('system', "Disconnected!");
+			};
 
-		</style>
-	</head>
-	<body>
-		<div class="container">
-			<div class="col-md-12">
+			websocket.onmessage = function(ev) {
+				var data = JSON.parse(ev.data);
 
+				switch(data.event) {
 
+					case "join": print('join', 'User has joined the room!'); break;
+					case "leave": print('leave', 'User has left the room!'); break;
+					case "message": print('message', '[' + data.nickname + '] ' + data.message); break;
+					default: print('system', data.message);
 
+				}
+			};
+
+			websocket.onerror = function(ev) {
+				print('error', ev.data);
+			};
+
+			$('.btn-send').on('click', sendMessage);
+			$('#form-send').on('submit', sendMessage);
+
+		});
+
+		function sendMessage(ev) {
+			var message = $input.val();
+			var nickname = $nickname.val();
+
+			websocket.send(JSON.stringify({event: 'message', nickname: nickname, message: message}));
+
+			$input.val('').focus();
+			ev.preventDefault();
+
+			return false;
+		}
+
+		function print(type, msg) {
+			var timestamp = (new Date()).toISOString();
+			$messages.append('<p class="ev-' + type + '">[' + timestamp + '] ' +  msg +  '</p>');
+			$messages.scrollTop($messages[0].scrollHeight);
+		}
+
+	</script>
+	<style>
+		.ev-system { font-weight: bold; color: darkgreen; }
+		.ev-join { font-weight: bold; color: darkorange; }
+		.ev-leave { font-weight: bold; color: blue; }
+		.ev-error { font-weight: bold; background: red; color: white; }
+		.ev-message { color: black; }
+	</style>
+</head>
+<body>
+<div class="container">
+
+	<div class="col-md-12">
+		<div class="panel panel-info">
+			<div class="panel-heading clearfix">
+				Chat via WebSockets
 			</div>
+
+			<div class="panel-body" id="messages"></div>
+
+			<form class="panel-footer clearfix" id="form-send" action="#">
+				<div class="row">
+					<div class="col-md-3">
+						<input type="text" class="form-control" id="nickname" value="DfKimera" placeholder="Nickname..." />
+					</div>
+					<div class="col-md-7">
+						<input type="text" class="form-control" id="input" placeholder="Enviar mensagem..." />
+					</div>
+					<div class="col-md-2">
+						<button style="width: 100%" type="submit" class="btn btn-primary">Enviar</button>
+					</div>
+				</div>
+			</form>
 		</div>
-	</body>
+	</div>
+
+</div>
+</body>
 </html>
