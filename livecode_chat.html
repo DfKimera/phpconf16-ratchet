@@ -7,11 +7,38 @@
 	<script>
 
 		var websocket;
+		var $messages;
 
 		$(function() {
 
 			// COLA :D
 			// onopen, onmessage, send
+
+			$messages = $('#messages');
+
+			websocket = new WebSocket("ws://127.0.0.1:8080");
+			websocket.onmessage = function (ev) {
+				var data = JSON.parse(ev.data);
+
+				$messages.append("<p>[" + data.nickname + "] " + data.message + "</p>");
+			};
+
+			function sendMessage(ev) {
+
+				var nickname = $('#fld-nickname').val();
+				var message = $('#fld-message').val();
+
+				websocket.send(JSON.stringify({
+					nickname: nickname,
+					message: message
+				}));
+
+				ev.preventDefault();
+
+				return false;
+			}
+
+			$('#frm-send').on('submit', sendMessage);
 
 		});
 
@@ -24,6 +51,28 @@
 <body>
 <div class="container">
 	<div class="col-md-12">
+
+		<div class="panel panel-primary">
+			<div class="panel-heading">
+				Chat
+			</div>
+			<div class="panel-body" id="messages">
+
+			</div>
+			<form class="panel-footer" method="POST" id="frm-send">
+				<div class="row">
+					<div class="col-md-4">
+						<input type="text" id="fld-nickname" placeholder="Nickname" />
+					</div>
+					<div class="col-md-4">
+						<input type="text" id="fld-message" placeholder="Mensagem..." />
+					</div>
+					<div class="col-md-4">
+						<button type="submit" class="btn btn-primary" id="btn-send">Enviar</button>
+					</div>
+				</div>
+			</form>
+		</div>
 
 
 
